@@ -1,0 +1,36 @@
+<script src="{{ 'product.js' | asset_url }}"></script>
+<script src="{{ 'shopify-money.js' | asset_url }}"></script>
+
+<h1>{{ product.title }}</h1>
+<div class="product-price">From: {{ product.selected_or_first_available_variant.price | money }}</div>
+<img 
+    class="product-image" 
+    src="{{ product.selected_or_first_available_variant.featured_image | image_url: width: 400 }}"
+    style="max-width: 400px;">
+{% if product.images.size > 1 %}
+    <div class="product-image-grid">
+        {% for image in product.images %}
+            <img src="{{ image | image_url: width: 100 }}">
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% form 'product', product %}
+    <select id="current-variant" name="id" data-product-handle="{{ product.handle }}">
+        {% for variant in product.variants %}
+            <option 
+                value="{{ variant.id }}"
+                {% if variant.id == product.selected_or_first_available_variant.id %}selected{% endif %}>
+                {{ variant.title }}
+            </option>
+        {% endfor %}
+    </select>
+    {% if product.selected_or_first_available_variant.available %}
+        <button class="atc-button" type="submit">Add to cart</button>
+    {% else %}
+        <button class="atc-button" disabled type="submit">SOLD OUT</button>
+    {% endif %}
+    <script type="application/json" id="product-variants-json">
+        {{ product.variants | json }}
+    </script>
+{% endform %}

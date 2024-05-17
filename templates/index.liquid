@@ -1,0 +1,21 @@
+ {% # WHERE TO WRITE JS IN YOUR THEME %}
+
+ {% # 1. Inline %}
+
+ <form onsubmit="alert('Form Submitted on {{ template.name }}');">
+    <input type="text">
+    <input type="submit">
+ </form>
+
+ {% # 2. External JS file %}
+ <script src="{{ 'theme.js' | asset_url }}"></script>
+
+ {% 
+    # 1. Liquid doesn't resolve in JS files 
+    # 2. You can have a single JS file for the whole theme or separate the JS into separate files
+    # 3. Hybrid approach: create variables in the template file but write the logic in a separate JS file 
+%}
+
+<custom-component link_color="{{ settings.link_color }}">
+    <span style="color: red;">Lorem Ipsum</span>
+</custom-component>
