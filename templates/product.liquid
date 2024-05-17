@@ -16,15 +16,14 @@
 {% endif %}
 
 {% form 'product', product %}
-    <select id="current-variant" name="id" data-product-handle="{{ product.handle }}">
-        {% for variant in product.variants %}
-            <option 
-                value="{{ variant.id }}"
-                {% if variant.id == product.selected_or_first_available_variant.id %}selected{% endif %}>
-                {{ variant.title }}
-            </option>
-        {% endfor %}
-    </select>
+    {% for product_option in product.options_with_values %}
+        <select name="option{{ product_option.position }}">
+            {% for value in product_option.values %}
+                <option {% if value.selected %}selected{% endif %}>{{ value.name }}</option>
+            {% endfor %}
+        </select>
+    {% endfor %}
+    <input id="current-variant" type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}" data-product-handle="{{ product.handle }}">
     {% if product.selected_or_first_available_variant.available %}
         <button class="atc-button" type="submit">Add to cart</button>
     {% else %}
