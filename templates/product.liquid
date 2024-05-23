@@ -1,35 +1,37 @@
+<product-page handle="{{ product.handle }}">
+    <h1>{{ product.title }}</h1>
+    <div class="product-price">From: {{ product.selected_or_first_available_variant.price | money }}</div>
+    <img 
+        class="product-image" 
+        src="{{ product.selected_or_first_available_variant.featured_image | image_url: width: 400 }}"
+        style="max-width: 400px;">
+    {% if product.images.size > 1 %}
+        <div class="product-image-grid">
+            {% for image in product.images %}
+                <img src="{{ image | image_url: width: 100 }}">
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% form 'product', product %}
+        {% for product_option in product.options_with_values %}
+            <select name="option{{ product_option.position }}">
+                {% for value in product_option.values %}
+                    <option {% if value.selected %}selected{% endif %}>{{ value.name }}</option>
+                {% endfor %}
+            </select>
+        {% endfor %}
+        <input id="current-variant" type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+        {% if product.selected_or_first_available_variant.available %}
+            <button class="atc-button" type="submit">Add to cart</button>
+        {% else %}
+            <button class="atc-button" disabled type="submit">SOLD OUT</button>
+        {% endif %}
+        <script type="application/json" id="product-variants-json">
+            {{ product.variants | json }}
+        </script>
+    {% endform %}
+</product-page>
+
 <script src="{{ 'product.js' | asset_url }}"></script>
 <script src="{{ 'shopify-money.js' | asset_url }}"></script>
-
-<h1>{{ product.title }}</h1>
-<div class="product-price">From: {{ product.selected_or_first_available_variant.price | money }}</div>
-<img 
-    class="product-image" 
-    src="{{ product.selected_or_first_available_variant.featured_image | image_url: width: 400 }}"
-    style="max-width: 400px;">
-{% if product.images.size > 1 %}
-    <div class="product-image-grid">
-        {% for image in product.images %}
-            <img src="{{ image | image_url: width: 100 }}">
-        {% endfor %}
-    </div>
-{% endif %}
-
-{% form 'product', product %}
-    {% for product_option in product.options_with_values %}
-        <select name="option{{ product_option.position }}">
-            {% for value in product_option.values %}
-                <option {% if value.selected %}selected{% endif %}>{{ value.name }}</option>
-            {% endfor %}
-        </select>
-    {% endfor %}
-    <input id="current-variant" type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}" data-product-handle="{{ product.handle }}">
-    {% if product.selected_or_first_available_variant.available %}
-        <button class="atc-button" type="submit">Add to cart</button>
-    {% else %}
-        <button class="atc-button" disabled type="submit">SOLD OUT</button>
-    {% endif %}
-    <script type="application/json" id="product-variants-json">
-        {{ product.variants | json }}
-    </script>
-{% endform %}
