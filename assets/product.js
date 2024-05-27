@@ -11,6 +11,32 @@ class ProductPage extends HTMLElement {
         this.currentVariant = this.variants.find(variant => variant.id == document.querySelector('#current-variant').value);
         
         this.formElement.addEventListener('input', this.updateVariant.bind(this));
+        this.formElement.addEventListener('submit', this.handleFormSubmit.bind(this));
+    }
+
+    handleFormSubmit(evt) {
+        evt.preventDefault();
+
+        let formData = new FormData(this.formElement);
+        document.querySelector('side-cart').classList.remove('loaded');
+        fetch(window.Shopify.routes.root + 'cart/add.js', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            return response.json();
+        })
+        .then(json_response => {
+            console.log(json_response);
+            if(json_response.status != 'bad_request') {
+                document.querySelector('side-cart').addLineItem(json_response);
+            } else {
+                alert('Error: '+json_response.message);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
     }
 
     variantFromOptionValues() {

@@ -6,4 +6,6 @@
     <main>
         {{ content_for_layout }}
     </main>
+    {% section 'sidebar' %}
+    <script src="{{ 'shopify-money.js' | asset_url }}"></script>
 </body>
