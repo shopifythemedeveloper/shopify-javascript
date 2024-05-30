@@ -1,0 +1,43 @@
+<div id="product-recommendations"></div>
+
+<script>
+    fetch(window.Shopify.routes.root + "recommendations/products.json?product_id={{ product.id }}&limit=4")
+    .then(response => response.json())
+    .then(({ products }) => {
+        if (products.length > 0) {
+            console.log(products);
+            products.forEach(product => {
+                document.getElementById('product-recommendations').innerHTML += `
+                    <a href="${product.url}" class="recommended-product">
+                        <img src="${product.featured_image}" style="max-width: 25vw;aspect-ratio: 1;object-fit:cover;">
+                        <div>${product.title}</div>
+                    </a>
+                `;
+            })
+        }
+    }
+);
+
+</script>
+
+<style>
+    body {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: max-content;
+    }
+    #shopify-section-{{ section.id }} {
+        grid-column: 1/3;
+        border-top: 1px solid;
+        padding: 10px;
+    }
+    #product-recommendations {
+        display: flex;
+        justify-content: center;
+    }
+    .recommended-product {
+        text-align: center;
+        text-decoration: none;
+        color: black;
+    }
+</style>
