@@ -1,0 +1,209 @@
+{% comment %}Basic implementation{% endcomment %}
+{% comment %} <form id="search-form">
+    <input type="text" placeholder="Your search term">
+    <button type="submit">Search</button>
+</form>
+
+<div id="search-results"></div> 
+
+<script>
+    document.getElementById('search-form').addEventListener('submit', function(evt) {
+        evt.preventDefault();    
+        const term = this.querySelector('input').value;
+
+        if(term) {
+            console.log(term);
+
+            fetch(window.Shopify.routes.root + `search/suggest.json?q=${term}`)
+                .then((response) => response.json())
+                .then((suggestions) => {
+                    const productSuggestions = suggestions.resources.results.products;
+
+                    if (productSuggestions.length > 0) {
+                        console.log(productSuggestions);
+
+                        productSuggestions.forEach(function(product) {
+                            document.getElementById('search-results').innerHTML += `
+                                <a href="${product.url}" class="search-result-item">
+                                    ${product.featured_image.url != null 
+                                        ? `<img 
+                                            src="${product.featured_image.url}" 
+                                            alt="${product.featured_image.alt}" 
+                                            height="${product.featured_image.height}"
+                                            width="${product.featured_image.width}">` 
+                                        : `<img 
+                                            src="https://placehold.co/200x200?text=No+Image" 
+                                            alt="No Image">`
+                                        }
+                                    
+                                    <div>${product.title}</div>
+                                </a>
+                            `;
+                        })
+                        
+                    }
+                }
+                );
+        } else {
+            alert('Please type a term before clicking \'Search\'');
+        }
+    });
+</script>
+
+<style>
+    #search-results {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .search-result-item {
+        text-align: center;
+        text-decoration: none;
+        color: black;
+    }
+    .search-result-item img {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+    }
+</style> {% endcomment %}
+
+{% comment %}More complex implementation{% endcomment %}
+
+<form id="search-form">
+    <input type="text" placeholder="Your search term" value="{{ search.terms }}">
+    <button type="submit">Search</button>
+</form>
+
+<div id="search-results"></div> 
+
+<script>
+
+    function fetchSuggestions(term, types) {
+        fetch(window.Shopify.routes.root + `search/suggest.json?q=${term}&resources[type]=${types}`)
+                .then((response) => response.json())
+                .then((suggestions) => {
+
+                    window.history.replaceState({}, '', window.Shopify.routes.root + `search?q=${term}`);
+                    
+                    console.log(suggestions);
+
+                    const productSuggestions = suggestions.resources.results.products;
+
+                    document.getElementById('search-results').innerHTML = ``;
+
+                    if (productSuggestions.length > 0) {
+                        console.log(productSuggestions);
+
+                        document.getElementById('search-results').innerHTML += '<h2 style="width:100%;">Products</h2>';
+
+                        productSuggestions.forEach(function(product) {
+                            document.getElementById('search-results').innerHTML += `
+                                <a href="${product.url}" class="search-result-item">
+                                    ${product.featured_image.url != null 
+                                        ? `<img 
+                                            src="${product.featured_image.url}" 
+                                            alt="${product.featured_image.alt}" 
+                                            height="${product.featured_image.height}"
+                                            width="${product.featured_image.width}">` 
+                                        : `<img 
+                                            src="https://placehold.co/200x200?text=No+Image" 
+                                            alt="No Image">`
+                                        }
+                                    
+                                    <div>${product.title}</div>
+                                </a>
+                            `;
+                        })
+                        
+                    } else {
+                        document.getElementById('search-results').innerHTML = '<div>Your search returned no products</div>';
+                    }
+
+                    const pageSuggestions = suggestions.resources.results.pages;
+
+                    if (pageSuggestions.length > 0) {
+                        console.log(pageSuggestions);
+
+                        document.getElementById('search-results').innerHTML += '<h2 style="width:100%;">Pages</h2>';
+
+                        let results_list = '<ul>';
+
+                        pageSuggestions.forEach(function(page) {
+                            results_list += `<li><a href="${page.url}">${page.title}</a></li>`;
+                        });
+                        results_list += '</ul>';
+                        
+                        document.getElementById('search-results').innerHTML += results_list;
+                    } else {
+                        document.getElementById('search-results').innerHTML += '<div>Your search returned no pages</div>';
+                    }
+
+                    const articleSuggestions = suggestions.resources.results.articles;
+
+                    if (articleSuggestions.length > 0) {
+                        console.log(articleSuggestions);
+
+                        document.getElementById('search-results').innerHTML += '<h2 style="width:100%;">Articles</h2>';
+
+                        let results_list = '<ul>';
+
+                        articleSuggestions.forEach(function(article) {
+                            results_list += `<li><a href="${article.url}">${article.title}</a></li>`;
+                        });
+                        results_list += '</ul>';
+                        
+                        document.getElementById('search-results').innerHTML += results_list;
+                    } else {
+                        document.getElementById('search-results').innerHTML += '<div>Your search returned no articles</div>';
+                    }
+                }
+        );
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const term = '{{ search.terms  }}';
+        const types = 'product,page,article';
+        if(term != '') fetchSuggestions(term, types);
+    })
+
+    document.getElementById('search-form').addEventListener('submit', function(evt) {
+        evt.preventDefault();    
+        
+        const term = this.querySelector('input').value;
+        const types = 'product,page,article';
+
+        if(term) {
+            fetchSuggestions(term, types);
+            
+        } else {
+            alert('Please type a term before clicking \'Search\'');
+        }
+    });
+</script>
+
+<style>
+    #search-results {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .search-result-item {
+        text-align: center;
+        text-decoration: none;
+        color: black;
+    }
+    .search-result-item img {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+    }
+    h2, ul {
+        margin: 0;
+    }
+    ul {
+        margin-right: auto;
+    }
+</style>

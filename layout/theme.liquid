@@ -6,4 +6,9 @@
     <main>
         {{ content_for_layout }}
     </main>
+    {% section 'sidebar' %}
+    {% comment %} {% section 'product-loader' %} {% endcomment %}
+    {% if template contains 'product' %}
+        {% section 'product-recommendations' %}
+    {% endif %}
 </body>

@@ -1,0 +1,88 @@
+<script src="{{ 'shopify-money.js' | asset_url }}" defer></script>
+<script src="{{ 'product.js' | asset_url }}" defer></script>
+
+<h1>{{ product.title }}</h1>
+<div class="product-price">From: {{ product.price | money }}</div>
+<img class="product-image" src="{{ product.featured_image | image_url: width: 400 }}">
+{% if product.images.size > 1 %}
+    <div class="product-image-grid">
+        {% for image in product.images %}
+            <img src="{{ image | image_url: width: 100 }}">
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% form 'product', product %}
+    {% unless product.has_only_default_variant %}
+        <div class="product-variants">
+            {% for variant in product.variants %}
+                <label>
+                    <input 
+                        type="radio" 
+                        name="id" 
+                        value="{{ variant.id }}"
+                        {% if variant == product.selected_or_first_available_variant %}
+                            checked
+                        {% endif %}    
+                        >
+                    {{ variant.title }}
+                </label>
+            {% endfor %}
+        </div>
+    {% endunless %}
+    <script type="application/json" id="product-variants-json">
+        {{ product.variants | json }}
+    </script>
+    <input 
+        type="submit" 
+        {% if product.selected_or_first_available_variant.available %}
+            value="Add to cart"
+        {% else %}
+            disabled
+            value="SOLD OUT"    
+        {% endif %}
+    >
+{% endform %}
+
+<product-page handle="{{ product.handle }}">
+    <h1>{{ product.title }}</h1>
+    <div class="product-price">From: {{ product.price | money }}</div>
+    <img class="product-image" src="{{ product.featured_image | image_url: width: 400 }}">
+    {% if product.images.size > 1 %}
+        <div class="product-image-grid">
+            {% for image in product.images %}
+                <img src="{{ image | image_url: width: 100 }}">
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    {% form 'product', product %}
+        {% unless product.has_only_default_variant %}
+            <div class="product-options">
+                {% for product_option in product.options_with_values %}
+                    <div class="product-option">
+                        <strong>{{ product_option.name }}</strong>
+                        <select name="option{{ forloop.index }}">
+                            {% for value in product_option.values %}
+                                <option value="{{ value }}">{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endunless %}
+        <script type="application/json" id="product-variants-json">
+            {{ product.variants | json }}
+        </script>
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+        <input 
+            type="submit" 
+            {% if product.selected_or_first_available_variant.available %}
+                value="Add to cart"
+            {% else %}
+                disabled
+                value="SOLD OUT"    
+            {% endif %}
+        >
+    {% endform %}
+</product-page>
